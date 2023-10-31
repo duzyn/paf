@@ -24,7 +24,7 @@
   - [Clear cache](#clear-cache)
   - [Check the dependency of the paf](#check-the-dependency-of-the-paf)
 - [Advanced options](#advanced-options)
-- [致谢](#致谢)
+- [Thanks](#thanks)
 
 paf is a command-line package manager for PortableApps.
 
@@ -361,7 +361,8 @@ The following advanced options can be set according to your actual situation.
 - [_aria2c_connect_timeout](https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-connect-timeout): Default is 10
 - _github_mirror: Default is false, If users in China are slow to access GitHub, they can set it to <https://ghproxy.com>
 
-## 致谢
+## Thanks
 
 - [Scoop](https://github.com/ScoopInstaller/Scoop)
 - [Homebrew](https://github.com/Homebrew/brew)
+- [PortableApps.com](https://portableapps.com/apps)
