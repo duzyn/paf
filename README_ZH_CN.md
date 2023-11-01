@@ -1,4 +1,6 @@
-# paf-cli  <!-- omit from toc -->
+[English](./README.md) | **简体中文**
+
+# paf  <!-- omit from toc -->
 
 - [特性](#特性)
 - [安装](#安装)
@@ -45,14 +47,14 @@ paf 是一个用于管理 PortableApps 便携软件的命令行包管理器。
 
 运行以下命令克隆本仓库到你的系统：
 
-    git clone https://github.com/duzyn/paf-cli
-    cd paf-cli
+    git clone https://github.com/duzyn/paf
+    cd paf
 
 运行 `paf` 查看使用说明。这样后续 paf 有更新，可以使用 Git 更新。
 
 ### 方法二：下载仓库的存档
 
-点击 [下载](https://github.com/duzyn/paf-cli/archive/refs/heads/main.zip) 最新代码的存档，解压缩到一个文件夹后，进入文件夹，运行 `paf` 查看使用说明。
+点击 [下载](https://github.com/duzyn/paf/archive/refs/heads/main.zip) 最新代码的存档，解压缩到一个文件夹后，进入文件夹，运行 `paf` 查看使用说明。
 
 ### 方法三：下载 paf.cmd
 

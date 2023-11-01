@@ -1,4 +1,6 @@
-# paf-cli  <!-- omit from toc -->
+**English** | [简体中文](./README_ZH_CN.md)
+
+# paf  <!-- omit from toc -->
 
 - [Features](#features)
 - [Installation](#installation)
@@ -45,14 +47,14 @@ Use paf to install the PortableApps portable software you need with just a few l
 
 Run the following command to clone this repository to your system:
 
-    git clone https://github.com/duzyn/paf-cli
-    cd paf-cli
+    git clone https://github.com/duzyn/paf
+    cd paf
 
 Run `paf` to view the instructions. If there is an update to paf, it can be updated using Git.
 
 ### Method 2: Download the archive of the repository
 
-Click to [Download](https://github.com/duzyn/paf-cli/archive/refs/heads/main.zip) the archive of the latest code, unzip it to a folder, go to the folder, and run `paf` to view the instructions.
+Click to [Download](https://github.com/duzyn/paf/archive/refs/heads/main.zip) the archive of the latest code, unzip it to a folder, go to the folder, and run `paf` to view the instructions.
 
 ### Method 3: Download paf.cmd
 
