@@ -651,6 +651,28 @@ for /f "tokens=* delims=" %%G in ('call "%_rg%" \"(/apps/.+portable)\" --only-ma
 echo https://portableapps.com/apps/internet/firefox-portable-esr>>"%_cache_dir%\apps-url.txt"
 echo https://portableapps.com/apps/utilities/java_portable_64>>"%_cache_dir%\apps-url.txt"
 echo https://portableapps.com/apps/utilities/jdkportable64>>"%_cache_dir%\apps-url.txt"
+echo https://portableapps.com/apps/development/portableapps.com_installer>>"%_cache_dir%\apps-url.txt"
+echo https://portableapps.com/apps/development/portableapps.com_launcher>>"%_cache_dir%\apps-url.txt"
+echo https://portableapps.com/apps/development/xampp>>"%_cache_dir%\apps-url.txt"
+echo https://portableapps.com/apps/internet/private_browsing>>"%_cache_dir%\apps-url.txt"
+echo https://portableapps.com/apps/utilities/jportable-browser-switch>>"%_cache_dir%\apps-url.txt"
+echo https://portableapps.com/apps/utilities/java_portable_launcher>>"%_cache_dir%\apps-url.txt"
+echo https://portableapps.com/apps/utilities/OpenJDK>>"%_cache_dir%\apps-url.txt"
+echo https://portableapps.com/apps/utilities/OpenJDK64>>"%_cache_dir%\apps-url.txt"
+echo https://portableapps.com/apps/utilities/portableapps.com_appcompactor>>"%_cache_dir%\apps-url.txt"
+echo https://portableapps.com/apps/utilities/toucan>>"%_cache_dir%\apps-url.txt"
+
+:: Extras apps
+@REM https://portableapps.com/apps/internet/thunderbird_portable/test
+@REM https://portableapps.com/apps/office/scribus-portable-test
+@REM https://portableapps.com/apps/development/nsis_portable_ansi
+@REM https://portableapps.com/apps/music_video/musescore-portable-legacy-3
+@REM https://portableapps.com/apps/office/libreoffice-portable-still
+@REM https://portableapps.com/apps/internet/google-chrome-portable-beta
+@REM https://portableapps.com/apps/graphics_pictures/gimp_portable/photoshop_layout
+@REM https://portableapps.com/apps/graphics_pictures/freecad-portable-legacy-x86
+@REM https://portableapps.com/apps/utilities/colour-contrast-analyser-classic-portable
+@REM https://portableapps.com/apps/office/abiword-portable-test
 
 :: Download all apps' pages
 "%_aria2c%" --input-file="%_cache_dir%\apps-url.txt" --dir="%_cache_dir%" ^
