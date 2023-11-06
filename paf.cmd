@@ -1,5 +1,4 @@
 @echo off
-setlocal
 :: Configurations
 set "_bin_dir=%~dp0bin"
 set "_cache_dir=%~dp0cache"
@@ -92,8 +91,6 @@ if "%~1"=="upgrade" (
 @REM // TODO Quit all opened apps
 @REM // TODO Backup, restore
 @REM // TODO Install specific version app
-
-endlocal
 goto :eof
 
 :: Usage: 
@@ -619,6 +616,7 @@ exit /b 0
 :: Usage: call :update
 :update
 setlocal
+del /q "%_cache_dir%\*"
 :: Download apps index page
 set /p "_updating_cache_tips=Updating apps cache ... " <nul
 "%_aria2c%" https://portableapps.com/apps --dir="%_cache_dir%" --out=apps.html ^
@@ -632,56 +630,109 @@ set /p "_updating_cache_tips=Updating apps cache ... " <nul
 :: office and internet, Dia is in category office and graphics & pictures,
 :: Nuv(Kompozer) is in category development and internet.
 copy nul "%_cache_dir%\apps-url.txt" >nul
-for /f "tokens=* delims=" %%G in ('call "%_rg%" \"(/apps/.+portable)\" --only-matching --crlf --replace https://portableapps.com$1 "%_cache_dir%\apps.html"') do (
+for /f tokens^=2^ delims^=^" %%G in ('call "%_rg%" a\s+href^=\"/apps/.+\" --only-matching "%_cache_dir%\apps.html"') do (
   findstr /c:"%%G" "%_cache_dir%\apps-url.txt" >nul ^
-    || echo %%G>>"%_cache_dir%\apps-url.txt"
+    || echo https://portableapps.com%%G>>"%_cache_dir%\apps-url.txt"
 )
 
 :: URL redirection
 "%_sed%" -i -e "s|utilities/eraser_portable|security/eraser-portable|g" ^
-          -e "s|utilities/eraserdrop_portable|security/eraserdrop-portable|g" ^
-          -e "s|development/nvu_portable|development/kompozer-portable|g" ^
-          "%_cache_dir%\apps-url.txt"
+            -e "s|utilities/eraserdrop_portable|security/eraserdrop-portable|g" ^
+            -e "s|development/nvu_portable|development/kompozer-portable|g" ^
+            "%_cache_dir%\apps-url.txt"
 
 :: URL deletion
 :: TweetDeck and TidyTabs have been removed from PortableApps.com
-"%_sed%" -i -e "/tweetdeck-portable/d" -e "/tidytabs-portable/d" "%_cache_dir%\apps-url.txt"
+:: Delete apps catalog pages url
+"%_sed%" -i -e "/tweetdeck-portable/d" ^
+            -e "/tidytabs-portable/d" ^
+            -e "/accessibility$/d" ^
+            -e "/development$/d" ^
+            -e "/education$/d" ^
+            -e "/games$/d" ^
+            -e "/graphics_pictures$/d" ^
+            -e "/internet$/d" ^
+            -e "/music_video$/d" ^
+            -e "/office$/d" ^
+            -e "/security$/d" ^
+            -e "/utilities$/d" ^
+            "%_cache_dir%\apps-url.txt"
 
-:: Extras apps not on /apps
-echo https://portableapps.com/apps/internet/firefox-portable-esr>>"%_cache_dir%\apps-url.txt"
-echo https://portableapps.com/apps/utilities/java_portable_64>>"%_cache_dir%\apps-url.txt"
-echo https://portableapps.com/apps/utilities/jdkportable64>>"%_cache_dir%\apps-url.txt"
-echo https://portableapps.com/apps/development/portableapps.com_installer>>"%_cache_dir%\apps-url.txt"
-echo https://portableapps.com/apps/development/portableapps.com_launcher>>"%_cache_dir%\apps-url.txt"
-echo https://portableapps.com/apps/development/xampp>>"%_cache_dir%\apps-url.txt"
-echo https://portableapps.com/apps/internet/private_browsing>>"%_cache_dir%\apps-url.txt"
-echo https://portableapps.com/apps/utilities/jportable-browser-switch>>"%_cache_dir%\apps-url.txt"
-echo https://portableapps.com/apps/utilities/java_portable_launcher>>"%_cache_dir%\apps-url.txt"
-echo https://portableapps.com/apps/utilities/OpenJDK>>"%_cache_dir%\apps-url.txt"
-echo https://portableapps.com/apps/utilities/OpenJDK64>>"%_cache_dir%\apps-url.txt"
-echo https://portableapps.com/apps/utilities/portableapps.com_appcompactor>>"%_cache_dir%\apps-url.txt"
-echo https://portableapps.com/apps/utilities/toucan>>"%_cache_dir%\apps-url.txt"
-
-:: Extras apps
-@REM https://portableapps.com/apps/internet/thunderbird_portable/test
-@REM https://portableapps.com/apps/office/scribus-portable-test
-@REM https://portableapps.com/apps/development/nsis_portable_ansi
-@REM https://portableapps.com/apps/music_video/musescore-portable-legacy-3
-@REM https://portableapps.com/apps/office/libreoffice-portable-still
-@REM https://portableapps.com/apps/internet/google-chrome-portable-beta
-@REM https://portableapps.com/apps/graphics_pictures/gimp_portable/photoshop_layout
-@REM https://portableapps.com/apps/graphics_pictures/freecad-portable-legacy-x86
-@REM https://portableapps.com/apps/utilities/colour-contrast-analyser-classic-portable
-@REM https://portableapps.com/apps/office/abiword-portable-test
+:: Extra apps not on apps.html page
+>>"%_cache_dir%\apps-url.txt" (
+  echo.https://portableapps.com/apps/development/nsis_portable
+  echo.https://portableapps.com/apps/development/nsis_portable_ansi
+  echo.https://portableapps.com/apps/development/nsis_portable_unicode
+  echo.https://portableapps.com/apps/graphics_pictures/freecad-portable
+  echo.https://portableapps.com/apps/graphics_pictures/freecad-portable-legacy-x86
+  echo.https://portableapps.com/apps/graphics_pictures/xnview_portable
+  echo.https://portableapps.com/apps/graphics_pictures/xnview-mp-portable
+  echo.https://portableapps.com/apps/internet/firefox_portable
+  echo.https://portableapps.com/apps/internet/firefox_portable/legacy
+  echo.https://portableapps.com/apps/internet/firefox_portable/test
+  echo.https://portableapps.com/apps/internet/firefox-portable-esr
+  echo.https://portableapps.com/apps/internet/firefox-portable-nightly
+  echo.https://portableapps.com/apps/internet/google_chrome_portable
+  echo.https://portableapps.com/apps/internet/google-chrome-portable-64
+  echo.https://portableapps.com/apps/internet/google-chrome-portable-beta
+  echo.https://portableapps.com/apps/internet/google-chrome-portable-dev
+  echo.https://portableapps.com/apps/internet/opera_portable
+  echo.https://portableapps.com/apps/internet/opera-gx-portable
+  echo.https://portableapps.com/apps/internet/opera-portable-legacy-12
+  echo.https://portableapps.com/apps/internet/opera-portable-legacy-36
+  echo.https://portableapps.com/apps/internet/thunderbird_portable
+  echo.https://portableapps.com/apps/internet/thunderbird_portable/test
+  echo.https://portableapps.com/apps/internet/thunderbird-portable-legacy-102
+  echo.https://portableapps.com/apps/internet/thunderbird-portable-legacy-52
+  echo.https://portableapps.com/apps/internet/thunderbird-portable-legacy-68
+  echo.https://portableapps.com/apps/internet/thunderbird-portable-legacy-91
+  echo.https://portableapps.com/apps/music_video/musescore_portable
+  echo.https://portableapps.com/apps/music_video/musescore-portable-legacy-3
+  echo.https://portableapps.com/apps/office/abiword_portable
+  echo.https://portableapps.com/apps/office/abiword-portable-test
+  echo.https://portableapps.com/apps/office/libreoffice_portable
+  echo.https://portableapps.com/apps/office/libreoffice-portable-legacy-5.4
+  echo.https://portableapps.com/apps/office/libreoffice-portable-still
+  echo.https://portableapps.com/apps/security/eraser-dot-net-portable
+  echo.https://portableapps.com/apps/security/eraser-portable
+  echo.https://portableapps.com/apps/utilities/colour-contrast-analyser-classic-portable
+  echo.https://portableapps.com/apps/utilities/java_portable
+  echo.https://portableapps.com/apps/utilities/java_portable_64
+  echo.https://portableapps.com/apps/utilities/jdkportable
+  echo.https://portableapps.com/apps/utilities/jdkportable64
+  echo.https://portableapps.com/apps/utilities/keepass_portable
+  echo.https://portableapps.com/apps/utilities/keepass-pro-portable
+  echo.https://portableapps.com/apps/utilities/OpenJDK
+  echo.https://portableapps.com/apps/utilities/OpenJDK64
+  echo.https://portableapps.com/apps/utilities/winmerge-2011-portable
+  echo.https://portableapps.com/apps/utilities/yumi-portable
+  echo.https://portableapps.com/apps/utilities/yumi-uefi-portable
+)
 
 :: Download all apps' pages
 "%_aria2c%" --input-file="%_cache_dir%\apps-url.txt" --dir="%_cache_dir%" ^
-  --quiet=true --conditional-get=true --allow-overwrite=true ^
+  --quiet=true --conditional-get=true --allow-overwrite=false ^
   --max-concurrent-downloads=%_aria2c_max_concurrent_downloads% ^
     && echo Done || (
       echo Download failed.
       exit /b 23
     )
+
+@REM :: Extra apps
+@REM copy nul "%_cache_dir%\apps-url-2.txt" >nul
+@REM for /f tokens^=2^ delims^=^" %%G in ('call "%_rg%" Also\s+Available.+a\s+href^=\"/apps/.+\" --only-matching --no-filename "%_cache_dir%"') do (
+@REM   findstr /c:"%%G" "%_cache_dir%\apps-url-2.txt" >nul ^
+@REM     || echo https://portableapps.com%%G>>"%_cache_dir%\apps-url-2.txt"
+@REM )
+
+@REM :: Download extra apps' pages
+@REM "%_aria2c%" --input-file="%_cache_dir%\apps-url-2.txt" --dir="%_cache_dir%" ^
+@REM   --quiet=true --conditional-get=true --allow-overwrite=true ^
+@REM   --max-concurrent-downloads=%_aria2c_max_concurrent_downloads% ^
+@REM     && echo Done || (
+@REM       echo Download failed.
+@REM       exit /b 23
+@REM     )
 
 set /p "_updating_bucket_tips=Updating bucket ... " <nul
 :: Get an app's meta info from its app page
