@@ -1,4 +1,4 @@
 bucket/
 cache/
 downloads/
-test/*.log
+test/

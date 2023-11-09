@@ -1,44 +1,73 @@
 @echo off
 :: Configurations
+set "_version=1.0"
 set "_bin_dir=%~dp0bin"
-set "_cache_dir=%~dp0cache"
 set "_bucket_dir=%~dp0bucket"
+set "_cache_dir=%~dp0cache"
 set "_downloads_dir=%~dp0downloads"
 
+:: https://ss64.com/nt/syntax-64bit.html
+if "%PROCESSOR_ARCHITECTURE%"=="x86" (
+  if not defined PROCESSOR_ARCHITEW6432 (
+    set "_aria2c=%_bin_dir%\x86\aria2c.exe"
+    set "_rg=%_bin_dir%\x86\rg.exe"
+    set "_sed=%_bin_dir%\x86\sed.exe"
+  )
+) else if "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
+  set "_aria2c=%_bin_dir%\x64\aria2c.exe"
+  set "_rg=%_bin_dir%\x64\rg.exe"
+  set "_sed=%_bin_dir%\x64\sed.exe"
+) else if "%PROCESSOR_ARCHITECTURE%"=="IA64" (
+  set "_aria2c=%_bin_dir%\x64\aria2c.exe"
+  set "_rg=%_bin_dir%\x64\rg.exe"
+  set "_sed=%_bin_dir%\x64\sed.exe"
+) else if "%PROCESSOR_ARCHITECTURE%"=="ARM64" (
+  echo %Not support ARM64%
+)
+
 :: aria2 manual: https://aria2.github.io/manual/en/html/index.html
-set "_aria2c=%_bin_dir%\aria2c.exe"
 set "_aria2c_min_split_size=1MB"
 set "_aria2c_split=10"
 set "_aria2c_max_connection_per_server=10"
 set "_aria2c_max_concurrent_downloads=50"
 set "_aria2c_max_tries=2"
 set "_aria2c_connect_timeout=10"
-set "_rg=%_bin_dir%\rg.exe"
-set "_sed=%_bin_dir%\sed.exe"
 
 :: When download packages from SourceForge, we set all the mirrors to accelerate
 :: download. Available values: SourceForge mirror list is on here:
-:: https://sourceforge.net/p/forge/documentation/Mirrors/ 
-:: - altushost-swe, cfhcable, cytranet, deac-ams, deac-fra, deac-riga,
-:: excellmedia, freefr, gigenet, ixpeering, jaist, kumisystems, liquidtelecom,
-:: nav, nchc, netcologne, netix, newcontinuum, onboardcloud, phoenixnap,
-:: razaoinfo, sinalbr, sitsa, tenet, udomain, ufpr, unlimited, versaweb,
-:: webwerks, yer, zenlayer
-set "_sourceforge_mirror_list=cfhcable,cytranet,deac-ams,deac-fra,deac-riga,excellmedia,freefr,gigenet,ixpeering,jaist,kumisystems,liquidtelecom,nav,nchc,netcologne,netix,newcontinuum,onboardcloud,phoenixnap,razaoinfo,sinalbr,sitsa,tenet,udomain,ufpr,unlimited,versaweb,webwerks,yer,zenlayer"
+:: https://sourceforge.net/p/forge/documentation/Mirrors/
+set "_sourceforge_mirror_list=altushost-swe,cfhcable,cytranet,deac-ams,deac-fra,deac-riga,excellmedia,freefr,gigenet,ixpeering,jaist,kumisystems,liquidtelecom,nav,nchc,netcologne,netix,newcontinuum,onboardcloud,phoenixnap,razaoinfo,sinalbr,sitsa,tenet,udomain,ufpr,unlimited,versaweb,webwerks,yer,zenlayer"
 
 :: It's useful to use a GitHub mirror to download files in GitHub Releases, RAW
-:: or Archive. Available values: false, a GitHub mirror prefix
+:: or Archive. Available values: false, a GitHub mirror prefix, eg.
+:: set "_github_mirror=https://gh-proxy.com/github.com"
+:: set "_github_mirror=https://githubfast.com"
 set "_github_mirror=false"
-@REM set "_github_mirror=https://ghproxy.com"
 
 if not exist "%_bin_dir%" mkdir "%_bin_dir%"
-if not exist "%_cache_dir%" mkdir "%_cache_dir%"
 if not exist "%_bucket_dir%" mkdir "%_bucket_dir%"
+if not exist "%_cache_dir%" mkdir "%_cache_dir%"
 if not exist "%_downloads_dir%" mkdir "%_downloads_dir%"
+
+:: https://lallouslab.net/2019/04/16/batchography-detect-windows-language/
+:: https://docs.microsoft.com/en-us/previous-versions/office/developer/speech-technologies/hh361638(v=office.14)
+for /f "tokens=3" %%G in ('reg query "HKLM\SYSTEM\ControlSet001\Control\Nls\Language" /v Installlanguage') do (
+  set "_lang_id=%%G"
+)
+:: 0409 English
+set "_lang=English"
+if "%_lang_id%" == "0804" set "_lang=Chinese"
+:: Add more languages here
+
+for /f "tokens=1-2 delims==" %%G in ('type "languages\%_lang%.lng"') do (
+  set "%%G=%%H"
+)
 
 :: Help
 if [%~1]==[] call :help
-if "%~1"=="help" call :help %~2
+if "%~1"=="help" call :help
+if "%~1"=="--help" call :help
+if "%~1"=="-h" call :help
 if "%~1"=="cat" call :cat %~2
 if "%~1"=="checkup" call :checkup
 if "%~1"=="clean" call :clean
@@ -93,135 +122,84 @@ if "%~1"=="upgrade" (
 @REM // TODO Install specific version app
 goto :eof
 
-:: Usage: 
-::   call :help
-::   call :help <command>
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 :help
 setlocal
-if [%~1]==[] (
-  echo Usage: %~n0 ^<command^> [^<args^>]
-  echo:
-  echo Available commands are listed below.
-  echo Type '%~n0 help ^<command^>' to get more help for a specific command.
-  echo:
-  echo Command    Summary
-  echo -------    -------
-  echo cat        Show content of specified app manifest
-  echo checkup    Check for dependencies
-  echo clean      Clean the download cache
-  echo download   Download apps in the downloads folder and verify hashes
-  echo export     Exports installed apps in CSV format
-  echo help       Show this help
-  echo home       Opens the app homepage
-  echo import     Imports apps from a text file
-  echo info       Display information about an app
-  echo install    Install an app
-  echo known      List all known apps
-  echo list       List installed apps
-  echo search     Search available apps
-  echo status     Show status and check for new app versions
-  echo uninstall  Uninstall an app
-  echo update     Update cache
-  echo upgrade    Update an app
-)
-if "%~1"=="cat" (
-  echo Usage: %~n0 cat ^<app^>
-  echo:
-  echo Show content of specified manifest.
-)
-if "%~1"=="checkup" (
-  echo Usage: %~n0 checkup
-  echo:
-  echo Check for dependencies.
-)
-if "%~1"=="clean" (
-  echo Usage: %~n0 clean
-  echo:
-  echo Clean the download cache.
-)
-if "%~1"=="download" (
-  echo Usage: %~n0 download ^<app^>
-  echo:
-  echo Download apps in the downloads folder and verify hashes.
-)
-if "%~1"=="export" (
-  echo Usage: %~n0 export ^> %~n0.csv
-  echo:
-  echo Exports installed apps in CSV format.
-)
-if "%~1"=="help" (
-  echo Usage: %~n0 help
-  echo:
-  echo To get more help for a specific command, run:
-  echo     %~n0 help ^<command^>
-)
-if "%~1"=="home" (
-  echo Usage: %~n0 home ^<app^>
-  echo:
-  echo Opens the app homepage.
-)
-if "%~1"=="import" (
-  echo Usage: %~n0 import ^<path to %~n0.csv^>
-  echo:
-  echo To replicate a %~n0 installation from a file stored on Desktop, run:
-  echo     %~n0 import Desktop\%~n0.csv
-)
-if "%~1"=="info" (
-  echo Usage: %~n0 info ^<app^>
-  echo:
-  echo Display information about an app
-)
-if "%~1"=="install" (
-  echo Usage: %~n0 install ^<app^>
-  echo:
-  echo e.g. The usual way to install an app:
-  echo     %~n0 install FirefoxPortable
-  echo To install multi apps:
-  echo     %~n0 install FirefoxPortable GoogleChromePortable
-)
-if "%~1"=="known" (
-  echo Usage: %~n0 known
-  echo:
-  echo List all known apps from PortableApps.com.
-)
-if "%~1"=="list" (
-  echo Usage: %~n0 list
-  echo:
-  echo List installed apps.
-)
-if "%~1"=="status" (
-  echo Usage: %~n0 status
-  echo:
-  echo Show status and check for new app versions.
-)
-if "%~1"=="search" (
-  echo Usage: %~n0 search ^<app^>
-  echo:
-  echo Search available apps.
-)
-if "%~1"=="uninstall" (
-  echo Usage: %~n0 uninstall ^<app^>
-  echo:
-  echo e.g. The usual way to uninstall an app:
-  echo     %~n0 uninstall FirefoxPortable
-  echo To uninstall multi apps:
-  echo     %~n0 uninstall FirefoxPortable GoogleChromePortable
-)
-if "%~1"=="update" (
-  echo Usage: %~n0 update
-  echo:
-  echo Update cache.
-)
-if "%~1"=="upgrade" (
-  echo Usage: %~n0 upgrade ^<app^>
-  echo:
-  echo e.g. The usual way to upgrade an app:
-  echo     %~n0 upgrade FirefoxPortable
-  echo To upgrade multi apps:
-  echo     %~n0 upgrade FirefoxPortable GoogleChromePortable
-  echo To upgrade all outdated apps:
-  echo     %~n0 upgrade *
-)
+echo paf %_version%
+echo %A command-line installer for PortableApps.%
+echo %Project home page:% https://github.com/duzyn/paf
+echo:
+echo %USAGE:%
+echo     %paf COMMAND [ARGS]%
+echo:
+echo %ARGS:%
+echo     AppID
+echo         %AppID is defined in PortableApps.com Format, reference:%
+echo         https://portableapps.com/development/portableapps.com_format#appinfo
+echo     *
+echo         %When upgrading apps, * means all.%
+echo:
+echo %COMMANDS:%
+echo     cat
+echo         %Show content of specified app manifest.%
+echo             paf cat FirefoxPortable
+echo     checkup
+echo         %Check for dependencies.%
+echo             paf checkup
+echo     clean
+echo         %Clean the download cache.%
+echo             paf clean
+echo     download
+echo         %Download apps in the downloads folder and verify hashes.%
+echo             paf download FirefoxPortable
+echo             paf download FirefoxPortable GoogleChromePortable
+echo     export
+echo         %Exports installed apps in CSV format.%
+echo             paf export
+echo     help
+echo         %Show this help.%
+echo             paf
+echo             paf help
+echo             paf --help
+echo             paf -h
+echo     home
+echo         %Opens the app homepage.%
+echo             paf home FirefoxPortable
+echo     import
+echo         %Imports apps from a text file.%
+echo             paf import apps.csv
+echo     info
+echo         %Display information about an app.%
+echo             paf info FirefoxPortable
+echo     install
+echo         %Install an app.%
+echo             paf install FirefoxPortable
+echo             paf install FirefoxPortable GoogleChromePortable
+echo     known
+echo         %List all known apps.%
+echo             paf known
+echo     list
+echo         %List installed apps.%
+echo             paf list
+echo     search
+echo         %Search available apps.%
+echo             paf search firefox
+echo     status
+echo         %Show status and check for new app versions.%
+echo             paf status
+echo     uninstall
+echo         %Uninstall an app.%
+echo             paf uninstall FirefoxPortable
+echo             paf uninstall FirefoxPortable GoogleChromePortable
+echo     update
+echo         %Update cache.%
+echo             paf update
+echo     upgrade
+echo         %Update an app.%
+echo             paf upgrade FirefoxPortable
+echo             paf upgrade FirefoxPortable GoogleChromePortable
+echo             paf upgrade *
 endlocal
 exit /b 0
 
@@ -261,15 +239,15 @@ exit /b 0
 :cat
 setlocal
 if [%~1]==[] (
-  echo Please input an app name.
+  echo %Please input an app name.%
   exit /b 21
 )
 if not exist "%_bucket_dir%\%~1.csv" (
-  echo There is no %~1.
+  echo %There is no this app:% %~1.
   exit /b 22
 )
 type "%_bucket_dir%\%~1.csv" || (
-  echo Failed to show %~1 app manifest. 
+  echo %Failed to show  app manifest:% %~1. 
   exit /b 25
 )
 endlocal
@@ -277,22 +255,13 @@ exit /b 0
 
 :checkup
 setlocal
-echo Checking dependencies ... 
+echo %Checking dependencies% ... 
 for %%G in ("%_aria2c%" "%_rg%" "%_sed%") do (
-  set /p "_checking-tips=Checking %%~G ... " <nul
+  set /p "_checking-tips=%Checking% %%~G ... " <nul
   if exist %%G (
-    echo OK
+    echo %OK%
   ) else (
-    echo Not found
-    if [%%G]==["%_aria2c%"] (
-      echo Pleased download aria2 from https://github.com/aria2/aria2/releases, and extract aria2c.exe to %_bin_dir%.
-    )
-    if [%%G]==["%_rg%"] (
-      echo Pleased download ripgrep from https://github.com/BurntSushi/ripgrep/releases, and extract rg.exe to %_bin_dir%.
-    )
-    if [%%G]==["%_sed%"] (
-      echo Pleased download sed from https://github.com/mbuilov/sed-windows/releases, and extract sed.exe to %_bin_dir%.
-    )
+    echo %Not found%
   )
 )
 endlocal
@@ -301,9 +270,9 @@ exit /b 0
 :clean
 setlocal
 for %%G in ("%_cache_dir%" "%_bucket_dir%" "%_downloads_dir%") do (
-  set /p "_cleaning_cache_tips=Cleaning %%~G ... " <nul
+  set /p "_cleaning_cache_tips=%Cleaning% %%~G ... " <nul
   rmdir /s /q %%G && echo Done || (
-    echo Failed to clean.
+    echo %Failed to clean.%
     exit /b 26
   )
 )
@@ -313,7 +282,7 @@ exit /b 0
 :download
 setlocal
 if [%~1]==[] (
-  echo Please input an app name.
+  echo %Please input an app name.%
   exit /b 21
 )
 if not [%~2]==[] (
@@ -321,13 +290,13 @@ if not [%~2]==[] (
   call :download %~1
 )
 if not exist "%_bucket_dir%\%~1.csv" (
-  echo There is no %~1.
+  echo %There is no this app:% %~1.
   exit /b 22
 )
 call :_get_app_info %~1 || exit /b 1
 
 if not exist "%_downloads_dir%\%_app_filename%" (
-  echo Downloading %_app_filename% ...
+  echo %Downloading% %_app_filename% ...
   if [%_app_package_url_1%]==[] (
     "%_aria2c%" "%_app_package_url_2%?use_mirror={%_sourceforge_mirror_list%}" ^
       --dir="%_downloads_dir%" --out="%_app_filename%" ^
@@ -338,7 +307,7 @@ if not exist "%_downloads_dir%\%_app_filename%" (
       --split=%_aria2c_split% ^
       --connect-timeout=%_aria2c_connect_timeout% ^
       --max-tries=%_aria2c_max_tries% || (
-        echo Download failed.
+        echo %Download failed.%
         exit /b 23
       )
   ) else (
@@ -349,15 +318,15 @@ if not exist "%_downloads_dir%\%_app_filename%" (
       --max-connection-per-server=%_aria2c_max_connection_per_server% ^
       --min-split-size=%_aria2c_min_split_size% ^
       --split=%_aria2c_split% || (
-        echo Download failed.
+        echo %Download failed.%
         exit /b 23
       )
   )
 )
 
-set /p "_checking_hash_tips=Checking hash of %_app_filename% ... " <nul
+set /p "_checking_hash_tips=%Checking hash of% %_app_filename% ... " <nul
 where /q certutil || (
-  echo CertUtil is not found.
+  echo %CertUtil is not found.%
   exit /b 27
 )
 for /f "skip=1 delims=" %%G in ('certutil -hashfile "%_downloads_dir%\%_app_filename%" sha256 ^| findstr /v /i /c:certutil') do (
@@ -371,9 +340,9 @@ if "%_hash_md5%"=="%_app_hash%" set "_hash_is_correct=yes"
 if "%_hash_sha256%"=="%_app_hash%" set "_hash_is_correct=yes"
 
 if "%_hash_is_correct%"=="yes" (
-  echo OK
+  echo %OK%
 ) else (
-  echo Hash is wrong.
+  echo %Hash is wrong.%
   exit /b 24
 )
 endlocal
@@ -383,11 +352,11 @@ exit /b 0
 :export
 setlocal enabledelayedexpansion
 if not exist "%~d0\PortableApps" (
-  echo There is no portable apps in "%~d0\PortableApps" directory.
+  echo %There is no portable apps in% %~d0\PortableApps.
   exit /b 31
 )
 dir "%~d0\PortableApps" | findstr /c:Portable >nul || (
-  echo There is no portable apps in "%~d0\PortableApps" directory.
+  echo %There is no portable apps in% %~d0\PortableApps.
   exit /b 31
 )
 for /f "tokens=4 delims= " %%G in ('dir "%~d0\PortableApps" ^| findstr /c:Portable') do (
@@ -402,11 +371,11 @@ exit /b 0
 :home
 setlocal
 if [%~1]==[] (
-  echo Please input an app name.
+  echo %Please input an app name.%
   exit /b 21
 )
 if not exist "%_bucket_dir%\%~1.csv" (
-  echo There is no %~1.
+  echo %There is no this app:% %~1.
   exit /b 22
 )
 call :_get_app_info %~1 || exit /b 1
@@ -418,11 +387,11 @@ exit /b 0
 :import
 setlocal
 if [%~1]==[] (
-  echo Please input a file.
+  echo %Please input a file.%
   exit /b 41
 )
 if not exist "%~1" (
-  echo There is no %~1.
+  echo %There is no this app:% %~1.
   exit /b 22
 )
 for /f tokens^=1^ delims^=^" %%G in ('type "%~1"') do (
@@ -435,11 +404,11 @@ exit /b 0
 :info
 setlocal
 if [%~1]==[] (
-  echo Please input an app name.
+  echo %Please input an app name.%
   exit /b 21
 )
 if not exist "%_bucket_dir%\%~1.csv" (
-  echo There is no %~1.
+  echo %There is no this app:% %~1.
   exit /b 22
 )
 call :_get_app_info %~1 || exit /b 1
@@ -454,7 +423,7 @@ exit /b 0
 :install
 setlocal
 if [%~1]==[] (
-  echo Please input an app name.
+  echo %Please input an app name.%
   exit /b 21
 )
 if not [%~2]==[] (
@@ -462,7 +431,7 @@ if not [%~2]==[] (
   call :install %~1
 )
 if not exist "%_bucket_dir%\%~1.csv" (
-  echo There is no %~1.
+  echo %There is no this app:% %~1.
   exit /b 22
 )
 call :_get_app_info %~1 || exit /b 1
@@ -472,11 +441,11 @@ if exist "%~d0\PortableApps\%~1\App\AppInfo\appinfo.ini" (
 
 if exist "%~d0\PortableApps\%~1\App\AppInfo\appinfo.ini" (
   if "%_installed_app_display_version%" neq "%_app_version%" (
-    echo %~1 %_installed_app_display_version% is installed.
-    echo * %~1: %_installed_app_display_version% -^> %_app_version%
+    echo %~1 %_installed_app_display_version% %is installed.%
+    echo * %~1 %_installed_app_display_version% -^> %_app_version%
     call :download %~1
   ) else (
-    echo %~1 is up to date.
+    echo %~1 %is up to date.%
     exit /b 72
   )
 ) else (
@@ -484,11 +453,11 @@ if exist "%~d0\PortableApps\%~1\App\AppInfo\appinfo.ini" (
 )
 
 if exist "%_downloads_dir%\%_app_filename%" (
-  echo Installing %_app_appid% %_app_version% ... 
-  echo Please continue with the PortableApps.com Installer.
+  echo %Installing% %_app_appid% %_app_version% ... 
+  echo %Please continue with the PortableApps.com Installer.%
   :: PortableApps installer doesn't support installer command options.
-  call "%_downloads_dir%\%_app_filename%" && echo %_app_appid% %_app_version% was installed successfully. || (
-    echo Installation failed.
+  call "%_downloads_dir%\%_app_filename%" && echo %_app_appid% %_app_version% %was installed successfully.% || (
+    echo %Installation failed.%
     exit /b 71
   )
 )
@@ -510,24 +479,24 @@ exit /b 0
 :list
 setlocal enabledelayedexpansion
 if not exist "%~d0\PortableApps" (
-  echo There is no portable apps in "%~d0\PortableApps" directory.
+  echo %There is no portable apps in% %~d0\PortableApps.
   exit /b 31
 )
 dir "%~d0\PortableApps" | findstr /c:Portable >nul || (
-  echo There is no portable apps in "%~d0\PortableApps" directory.
+  echo %There is no portable apps in% %~d0\PortableApps.
   exit /b 31
 )
-echo Installed apps:
+echo %Installed apps:%
 set _apps_count_tmp=0
 for /f "tokens=4 delims= " %%G in ('dir "%~d0\PortableApps" ^| findstr /c:Portable') do (
   call :_get_installed_app_info %%G || exit /b 1
   if [!_installed_app_appid!] neq [] (
-    echo * !_installed_app_appid!: !_installed_app_display_version!
+    echo * !_installed_app_appid! !_installed_app_display_version!
     set /a _apps_count_tmp+=1 >nul
   )
 )
 for /f "delims=" %%G in ('echo %_apps_count_tmp%') do set _apps_count=%%G
-echo Total: %_apps_count% apps.
+echo %Total of apps:% %_apps_count%
 set "_apps_count_tmp="
 endlocal
 exit /b 0
@@ -536,33 +505,33 @@ exit /b 0
 :status
 setlocal enabledelayedexpansion
 if not exist "%~d0\PortableApps" (
-  echo There is no portable apps in "%~d0\PortableApps" directory.
+  echo %There is no portable apps in% %~d0\PortableApps.
   exit /b 31
 )
-echo Outdated apps:
+echo %Outdated apps:%
 set _apps_count_tmp=0
 for /f "tokens=4 delims= " %%G in ('dir "%~d0\PortableApps" ^| findstr /c:Portable') do (
   if [%%G]==[] (
-    echo There is no portable apps.
+    echo %There is no portable apps.%
     exit /b 21
   )
   if not exist "%_bucket_dir%\%%G.csv" (
-    echo There is no %~1.
+    echo %There is no this app:% %~1.
     exit /b 22
   )
   if not exist "%~d0\PortableApps\%%G\App\AppInfo\appinfo.ini" (
-    echo %~1 is not installed.
+    echo %App is not installed:% %~1
     exit /b 81
   )
   call :_get_app_info %%G || exit /b 1
   call :_get_installed_app_info %%G || exit /b 1
   if "!_installed_app_display_version!" neq "!_app_version!" (
-    echo * !_app_appid!: !_installed_app_display_version! -^> !_app_version!
+    echo * !_app_appid! !_installed_app_display_version! -^> !_app_version!
     set /a _apps_count_tmp+=1 >nul
   )
 )
 for /f "delims=" %%G in ('echo %_apps_count_tmp%') do set _apps_count=%%G
-echo Total: %_apps_count% apps.
+echo %Total of apps:% %_apps_count%
 set "_apps_count_tmp="
 endlocal
 exit /b 0
@@ -571,21 +540,21 @@ exit /b 0
 :search
 setlocal
 if [%~1]==[] (
-  echo Please input an app name.
+  echo %Please input an app name.%
   exit /b 21
 )
 dir "%_bucket_dir%" | findstr /i /c:%~1 >nul || (
-  echo There is no %~1.
+  echo %There is no this app:% %~1.
   exit /b 22
 )
-echo Search results:
+echo %Search results:%
 set _apps_count_tmp=0
 for /f "tokens=4 delims= " %%G in ('dir "%_bucket_dir%" ^| findstr /i /c:%~1') do (
   if [%%G] neq [] set /a _apps_count_tmp+=1 >nul
   echo * %%~nG
 )
 for /f "delims=" %%G in ('echo %_apps_count_tmp%') do set _apps_count=%%G
-echo Total: %_apps_count% apps.
+echo %Total of apps:% %_apps_count%
 set "_apps_count_tmp="
 endlocal
 exit /b 0
@@ -594,7 +563,7 @@ exit /b 0
 :uninstall
 setlocal
 if [%~1]==[] (
-  echo Please input an app name.
+  echo %Please input an app name.%
   exit /b 21
 )
 if not [%~2]==[] (
@@ -602,14 +571,14 @@ if not [%~2]==[] (
   call :uninstall %~1
 )
 if not exist "%~d0\PortableApps\%~1\" (
-  echo %~1 is not installed.
+  echo %App is not installed:% %~1.
   exit /b 81
 )
 call :_get_installed_app_info %~1 || exit /b 1
-echo Uninstalling %_installed_app_appid% %_installed_app_display_version% ...
-echo Removing %~d0\PortableApps\%_installed_app_appid%\ ...
+echo %Uninstalling% %_installed_app_appid% %_installed_app_display_version% ...
+echo %Removing% %~d0\PortableApps\%_installed_app_appid%\ ...
 rmdir /q /s "%~d0\PortableApps\%_installed_app_appid%\" || exit /b 82
-echo %_installed_app_appid% %_installed_app_display_version% was uninstalled successfully.
+echo %_installed_app_appid% %_installed_app_display_version% %was uninstalled successfully.%
 endlocal
 exit /b 0
 
@@ -618,11 +587,12 @@ exit /b 0
 setlocal
 del /q "%_cache_dir%\*"
 :: Download apps index page
-set /p "_updating_cache_tips=Updating apps cache ... " <nul
+set /p "_updating_cache_tips=%Updating apps cache% ... " <nul
+@REM echo %Updating apps cache ... %
 "%_aria2c%" https://portableapps.com/apps --dir="%_cache_dir%" --out=apps.html ^
   --quiet=true --conditional-get=true --allow-overwrite=true ^
     || (
-      echo Download failed.
+      echo %Download failed.%
       exit /b 23
     )
 
@@ -631,8 +601,7 @@ set /p "_updating_cache_tips=Updating apps cache ... " <nul
 :: Nuv(Kompozer) is in category development and internet.
 copy nul "%_cache_dir%\apps-url.txt" >nul
 for /f tokens^=2^ delims^=^" %%G in ('call "%_rg%" a\s+href^=\"/apps/.+\" --only-matching "%_cache_dir%\apps.html"') do (
-  findstr /c:"%%G" "%_cache_dir%\apps-url.txt" >nul ^
-    || echo https://portableapps.com%%G>>"%_cache_dir%\apps-url.txt"
+  echo https://portableapps.com%%G>>"%_cache_dir%\apps-url.txt"
 )
 
 :: URL redirection
@@ -659,7 +628,7 @@ for /f tokens^=2^ delims^=^" %%G in ('call "%_rg%" a\s+href^=\"/apps/.+\" --only
             "%_cache_dir%\apps-url.txt"
 
 :: Extra apps not on apps.html page
->>"%_cache_dir%\apps-url.txt" (
+(
   echo.https://portableapps.com/apps/development/nsis_portable
   echo.https://portableapps.com/apps/development/nsis_portable_ansi
   echo.https://portableapps.com/apps/development/nsis_portable_unicode
@@ -707,34 +676,30 @@ for /f tokens^=2^ delims^=^" %%G in ('call "%_rg%" a\s+href^=\"/apps/.+\" --only
   echo.https://portableapps.com/apps/utilities/winmerge-2011-portable
   echo.https://portableapps.com/apps/utilities/yumi-portable
   echo.https://portableapps.com/apps/utilities/yumi-uefi-portable
+)>>"%_cache_dir%\apps-url.txt"
+
+:: Remove duplicated lines
+move "%_cache_dir%\apps-url.txt" "%_cache_dir%\apps-url-1.txt" /y >nul
+@REM copy nul "%_cache_dir%\apps-url.txt" >nul
+for /f "tokens=*" %%G in ('type "%_cache_dir%\apps-url-1.txt"') do (
+  findstr /c:"%%G" "%_cache_dir%\apps-url.txt" >nul ^
+    || echo %%G>>"%_cache_dir%\apps-url.txt"
 )
+
+:: Mozilla Firefox, Portable Edition - Legacy Editions
+:: jPortable Browser Switch
+:: These two apps is not in bucket.
 
 :: Download all apps' pages
 "%_aria2c%" --input-file="%_cache_dir%\apps-url.txt" --dir="%_cache_dir%" ^
   --quiet=true --conditional-get=true --allow-overwrite=false ^
   --max-concurrent-downloads=%_aria2c_max_concurrent_downloads% ^
-    && echo Done || (
-      echo Download failed.
+    && echo %Done% || (
+      echo %Download failed.%
       exit /b 23
     )
 
-@REM :: Extra apps
-@REM copy nul "%_cache_dir%\apps-url-2.txt" >nul
-@REM for /f tokens^=2^ delims^=^" %%G in ('call "%_rg%" Also\s+Available.+a\s+href^=\"/apps/.+\" --only-matching --no-filename "%_cache_dir%"') do (
-@REM   findstr /c:"%%G" "%_cache_dir%\apps-url-2.txt" >nul ^
-@REM     || echo https://portableapps.com%%G>>"%_cache_dir%\apps-url-2.txt"
-@REM )
-
-@REM :: Download extra apps' pages
-@REM "%_aria2c%" --input-file="%_cache_dir%\apps-url-2.txt" --dir="%_cache_dir%" ^
-@REM   --quiet=true --conditional-get=true --allow-overwrite=true ^
-@REM   --max-concurrent-downloads=%_aria2c_max_concurrent_downloads% ^
-@REM     && echo Done || (
-@REM       echo Download failed.
-@REM       exit /b 23
-@REM     )
-
-set /p "_updating_bucket_tips=Updating bucket ... " <nul
+set /p "_updating_bucket_tips=%Updating bucket% ... " <nul
 :: Get an app's meta info from its app page
 copy nul "%_cache_dir%\apps-parameters.txt" >nul
 for /f tokens^=1^ delims^=^" %%G in ('call "%_rg%" "antivirus\?(.+).+Antivirus.+" --only-matching --replace $1 --no-filename "%_cache_dir%"') do (
@@ -744,23 +709,25 @@ for /f tokens^=1^ delims^=^" %%G in ('call "%_rg%" "antivirus\?(.+).+Antivirus.+
 :: Replace some special characters. &amp; -> &, &#39; -> ', %%2B -> +, %%20 ->
 :: (space), ^ -> -, & -> nul
 "%_sed%" -i -e "s@amp;@@g" ^
-          -e "s@&#39;@'@g" ^
-          -e "s@%%2B@+@g" ^
-          -e "s@%%20@ @g" ^
-          -e "s@\^@-@g" ^
-          -e "s@Search & Destroy@Search Destroy@g" ^
-          "%_cache_dir%\apps-parameters.txt"
+            -e "s@&#39;@'@g" ^
+            -e "s@%%2B@+@g" ^
+            -e "s@%%20@ @g" ^
+            -e "s@\^@-@g" ^
+            -e "s@Search & Destroy@Search Destroy@g" ^
+            "%_cache_dir%\apps-parameters.txt"
 
 del /q "%_bucket_dir%\*"
 for /f "tokens=2,4,6,8,10 delims=^&=" %%O in ('type "%_cache_dir%\apps-parameters.txt"') do (
-  echo "Name","%%O">>"%_bucket_dir%\%%P.csv"
-  echo "AppID","%%P">>"%_bucket_dir%\%%P.csv"
-  echo "Version","%%Q">>"%_bucket_dir%\%%P.csv"
-  echo "FileName","%%R">>"%_bucket_dir%\%%P.csv"
-  echo "Hash","%%S">>"%_bucket_dir%\%%P.csv"
-  echo "PackageUrl1","https://download2.portableapps.com/portableapps/%%P/%%R">>"%_bucket_dir%\%%P.csv"
-  echo "RefererUrl1","https://portableapps.com/downloading/?a=%%P&s=s&p=&d=pa&n=%%O&f=%%R">>"%_bucket_dir%\%%P.csv"
-  echo "PackageUrl2","https://sourceforge.net/projects/portableapps/files/%%O/%%R/download">>"%_bucket_dir%\%%P.csv"
+  (
+    echo."Name","%%O"
+    echo."AppID","%%P"
+    echo."Version","%%Q"
+    echo."FileName","%%R"
+    echo."Hash","%%S"
+    echo."PackageUrl1","https://download2.portableapps.com/portableapps/%%P/%%R"
+    echo."RefererUrl1","https://portableapps.com/downloading/?a=%%P&s=s&p=&d=pa&n=%%O&f=%%R"
+    echo."PackageUrl2","https://sourceforge.net/projects/portableapps/files/%%O/%%R/download"
+  )>>"%_bucket_dir%\%%P.csv"
 )
 
 :: Write homepage to bucket
@@ -815,10 +782,14 @@ for /f "tokens=* delims=" %%O in ('call "%_rg%" "canonical.+href.+(http.+portabl
 :: found. It's a PortableApps.com's bug.
 
 :: SMPlayer
-"%_sed%" -i -e "/PackageUrl1/d" -e "/RefererUrl1/d" "%_bucket_dir%\SMPlayerPortable.csv"
+"%_sed%" -i -e "/PackageUrl1/d" ^
+            -e "/RefererUrl1/d" ^
+            "%_bucket_dir%\SMPlayerPortable.csv"
 
 :: EmsisoftEmergencyKitPortable
-"%_sed%" -i -e "/PackageUrl1/d" -e "/RefererUrl1/d" "%_bucket_dir%\EmsisoftEmergencyKitPortable.csv"
+"%_sed%" -i -e "/PackageUrl1/d" ^
+            -e "/RefererUrl1/d" ^
+            "%_bucket_dir%\EmsisoftEmergencyKitPortable.csv"
 
 :: Correct some apps' FileName
 
@@ -839,23 +810,23 @@ for /f "tokens=* delims=" %%O in ('call "%_rg%" "canonical.+href.+(http.+portabl
 :: FreeCommanderPortable
 "%_sed%" -i -E "s@(PackageUrl1.+)http.+FreeCommanderPortable/@\1https://freecommander.com/downloads/@g" "%_bucket_dir%\FreeCommanderPortable.csv"
 "%_sed%" -i -e "s@downloading@redir2@g" ^
-          -e "s@p=&@p=https://freecommander.com/downloads/\&@g" ^
-          -e "s@n=FreeCommander XE Portable@@g" ^
-          -e "s@d=pa@d=pb@g" ^
-          "%_bucket_dir%\FreeCommanderPortable.csv"
+            -e "s@p=&@p=https://freecommander.com/downloads/\&@g" ^
+            -e "s@n=FreeCommander XE Portable@@g" ^
+            -e "s@d=pa@d=pb@g" ^
+            "%_bucket_dir%\FreeCommanderPortable.csv"
 
 :: BPBiblePortable
 if "%_github_mirror%"=="false" (
   "%_sed%" -i -E "s@https://download.+BPBiblePortable_(.+)\.paf\.exe@https://github.com/bpbible/bpbible/releases/download/release-\1/BPBiblePortable_\1.paf.exe@g" "%_bucket_dir%\BPBiblePortable.csv"
 ) else (
-  "%_sed%" -i -E "s@https://download.+BPBiblePortable_(.+)\.paf\.exe@%_github_mirror%/https://github.com/bpbible/bpbible/releases/download/release-\1/BPBiblePortable_\1.paf.exe@g" "%_bucket_dir%\BPBiblePortable.csv"
+  "%_sed%" -i -E "s@https://download.+BPBiblePortable_(.+)\.paf\.exe@%_github_mirror%/bpbible/bpbible/releases/download/release-\1/BPBiblePortable_\1.paf.exe@g" "%_bucket_dir%\BPBiblePortable.csv"
 )
 "%_sed%" -i -E "s@https://portableapps.+BPBiblePortable_(.+)\.paf\.exe@https://portableapps.com/redir2/?a=BPBiblePortable\&s=s\&p=https://github.com/bpbible/bpbible/releases/download/release-\1/\&d=pb\&f=BPBiblePortable_\1.paf.exe@g" "%_bucket_dir%\BPBiblePortable.csv"
 
 :: // BUG It's a PortableApps.com's bug
 "%_sed%" -i -e "s@\" VLC Media Player Portable \"@\"VLC Media Player Portable\"@g" ^
-          -e "s@/ VLC Media Player Portable /@/VLC Media Player Portable/@g" ^
-          "%_bucket_dir%\VLCPortable.csv"
+            -e "s@/ VLC Media Player Portable /@/VLC Media Player Portable/@g" ^
+            "%_bucket_dir%\VLCPortable.csv"
 
 :: Correct SpybotPortable's name
 "%_sed%" -i -e "s@Search Destroy@Search \& Destroy@g" "%_bucket_dir%\SpybotPortable.csv"
@@ -863,13 +834,13 @@ if "%_github_mirror%"=="false" (
 :: // TODO some apps are only on portableapps.com, not on sourceforge.net
 :: Remove wrong PackageUrl2
 
-echo Done
+echo %Done%
 
 :: Count apps
 set _apps_count_tmp=0
 for %%G in ("%_bucket_dir%\*.csv") do set /a _apps_count_tmp+=1 >nul
 for /f "delims=" %%G in ('echo %_apps_count_tmp%') do set _apps_count=%%G
-echo Total: %_apps_count% apps.
+echo %Total of apps:% %_apps_count%
 set "_apps_count_tmp="
 endlocal
 exit /b 0
@@ -880,7 +851,7 @@ exit /b 0
 :upgrade
 setlocal enabledelayedexpansion
 if [%~1]==[] (
-  echo Please input an app name.
+  echo %Please input an app name.%
   exit /b 21
 )
 if [%~1]==[*] (
@@ -890,7 +861,7 @@ if [%~1]==[*] (
   )
 ) else (
   if not exist "%_bucket_dir%\%~1.csv" (
-    echo There is no %~1.
+    echo %There is no this app:% %~1.
     exit /b 22
   )
   call :install %~1

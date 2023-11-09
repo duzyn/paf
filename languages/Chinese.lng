@@ -1,0 +1,72 @@
+[paf]
+Not support ARM64=不支持 arm64
+[help]
+A command-line installer for PortableApps.=一个用于管理 PortableApps 便携软件的命令行包管理器。 
+Project home page:=项目主页：
+USAGE:=用法：
+paf COMMAND [ARGS]=paf 命令 [参数]
+ARGS:=参数
+AppID is defined in PortableApps.com Format, reference:=AppID 在 PortableApps.com 格式有定义，参见：
+When upgrading apps, * means all.=当更新应用时，* 表示全部。
+COMMANDS:=命令：
+Show content of specified app manifest.=显示应用的元数据。
+Check for dependencies.=检测依赖工具。
+Clean the download cache.=清理下载的缓存。
+Download apps in the downloads folder and verify hashes.=下载应用到 downloads 文件夹并校验哈希值。
+Exports installed apps in CSV format.=将已安装的应用导出，显示为 CSV 格式。
+Show this help.=显示此帮助。
+Opens the app homepage.=打开应用的主页。
+Imports apps from a text file.=从一个文本文件导入应用。
+Display information about an app.=显示一个应用的信息。
+Install an app.=安装应用。
+List all known apps.=列出所有已知的应用。
+List installed apps.=列出已安装的应用。
+Search available apps.=搜索应用。
+Show status and check for new app versions.=显示状态，检查应用的新版本。
+Uninstall an app.=卸载应用。
+Update cache.=更新缓存。
+Update an app.=更新应用。
+[error]
+Please input an app name.=请输入一个应用名称。
+There is no this app:=找不到此应用：
+Failed to show  app manifest:=无法显示应用元数据：
+There is no portable apps in=在此目录没有便携应用
+Please input a file.=请输入一个文件。
+There is no portable apps.=没有便携应用。
+[checkup]
+Checking dependencies=正在检测依赖
+Checking=正在检测
+OK=正常
+Not found=未找到
+[clean]
+Cleaning=正在清理
+Failed to clean.=清理失败。
+[download]
+Downloading=正在下载
+Download failed.=下载失败。
+Checking hash of=正在检测此应用的哈希值
+CertUtil is not found.=未找到 CertUtil。
+Hash is wrong.=哈希值错误。
+[install]
+is installed.=已安装。
+is up to date.=已是最新版本。
+Installing=正在安装
+Please continue with the PortableApps.com Installer.=请使用 PortableApps.com 安装包继续。
+was installed successfully.=已安装成功。
+Installation failed.=安装失败。
+[list]
+Installed apps:=已安装的应用：
+Total of apps:=应用数总计：
+[status]
+Outdated apps:=有更新的应用：
+App is not installed:=应用未安装。
+[search]
+Search results:=搜索结果：
+[uninstall]
+Uninstalling=正在卸载
+Removing=正在删除
+was uninstalled successfully.=已卸载成功。
+[update]
+Updating apps cache=正在更新应用缓存
+Done=完成
+Updating bucket=正在更新应用库
