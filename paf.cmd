@@ -7,18 +7,22 @@ set "_cache_dir=%~dp0cache"
 set "_downloads_dir=%~dp0downloads"
 
 :: https://ss64.com/nt/syntax-64bit.html
-if "%PROCESSOR_ARCHITECTURE%"=="ARM64" (
-  echo %Not support ARM64%
-)
-set "_aria2c=%_bin_dir%\x64\aria2c.exe"
-set "_rg=%_bin_dir%\x64\rg.exe"
-set "_sed=%_bin_dir%\x64\sed.exe"
 if "%PROCESSOR_ARCHITECTURE%"=="x86" (
   if not defined PROCESSOR_ARCHITEW6432 (
     set "_aria2c=%_bin_dir%\x86\aria2c.exe"
     set "_rg=%_bin_dir%\x86\rg.exe"
     set "_sed=%_bin_dir%\x86\sed.exe"
   )
+) else if "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
+  set "_aria2c=%_bin_dir%\x64\aria2c.exe"
+  set "_rg=%_bin_dir%\x64\rg.exe"
+  set "_sed=%_bin_dir%\x64\sed.exe"
+) else if "%PROCESSOR_ARCHITECTURE%"=="IA64" (
+  set "_aria2c=%_bin_dir%\x64\aria2c.exe"
+  set "_rg=%_bin_dir%\x64\rg.exe"
+  set "_sed=%_bin_dir%\x64\sed.exe"
+) else if "%PROCESSOR_ARCHITECTURE%"=="ARM64" (
+  echo %Not support ARM64%
 )
 
 :: aria2 manual: https://aria2.github.io/manual/en/html/index.html
@@ -339,6 +343,7 @@ if "%_hash_is_correct%"=="yes" (
   echo %OK%
 ) else (
   echo %Hash is wrong.%
+  del /q "%_downloads_dir%\%_app_filename%"
   exit /b 24
 )
 endlocal
