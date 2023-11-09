@@ -59,7 +59,7 @@ set "_lang=English"
 if "%_lang_id%" == "0804" set "_lang=Chinese"
 :: Add more languages here
 
-for /f "tokens=1-2 delims==" %%G in ('type "languages\%_lang%.lng"') do (
+for /f "tokens=1-2 delims==" %%G in ('type "%~dp0languages\%_lang%.lng"') do (
   set "%%G=%%H"
 )
 
