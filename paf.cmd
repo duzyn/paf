@@ -7,22 +7,18 @@ set "_cache_dir=%~dp0cache"
 set "_downloads_dir=%~dp0downloads"
 
 :: https://ss64.com/nt/syntax-64bit.html
+if "%PROCESSOR_ARCHITECTURE%"=="ARM64" (
+  echo %Not support ARM64%
+)
+set "_aria2c=%_bin_dir%\x64\aria2c.exe"
+set "_rg=%_bin_dir%\x64\rg.exe"
+set "_sed=%_bin_dir%\x64\sed.exe"
 if "%PROCESSOR_ARCHITECTURE%"=="x86" (
   if not defined PROCESSOR_ARCHITEW6432 (
     set "_aria2c=%_bin_dir%\x86\aria2c.exe"
     set "_rg=%_bin_dir%\x86\rg.exe"
     set "_sed=%_bin_dir%\x86\sed.exe"
   )
-) else if "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
-  set "_aria2c=%_bin_dir%\x64\aria2c.exe"
-  set "_rg=%_bin_dir%\x64\rg.exe"
-  set "_sed=%_bin_dir%\x64\sed.exe"
-) else if "%PROCESSOR_ARCHITECTURE%"=="IA64" (
-  set "_aria2c=%_bin_dir%\x64\aria2c.exe"
-  set "_rg=%_bin_dir%\x64\rg.exe"
-  set "_sed=%_bin_dir%\x64\sed.exe"
-) else if "%PROCESSOR_ARCHITECTURE%"=="ARM64" (
-  echo %Not support ARM64%
 )
 
 :: aria2 manual: https://aria2.github.io/manual/en/html/index.html
@@ -40,9 +36,10 @@ set "_sourceforge_mirror_list=altushost-swe,cfhcable,cytranet,deac-ams,deac-fra,
 
 :: It's useful to use a GitHub mirror to download files in GitHub Releases, RAW
 :: or Archive. Available values: false, a GitHub mirror prefix, eg.
-:: set "_github_mirror=https://gh-proxy.com/github.com"
-:: set "_github_mirror=https://githubfast.com"
 set "_github_mirror=false"
+:: set "_github_mirror=https://gh-proxy.com/github.com"
+:: set "_github_mirror=https://mirror.ghproxy.com/github.com"
+:: set "_github_mirror=https://githubfast.com"
 
 if not exist "%_bin_dir%" mkdir "%_bin_dir%"
 if not exist "%_bucket_dir%" mkdir "%_bucket_dir%"
@@ -236,6 +233,20 @@ endlocal & (
 )
 exit /b 0
 
+:: Usage: call :_get_installed_plugin_info <plugin>
+:_get_installed_plugin_info
+setlocal
+for /f "tokens=1-2 delims==" %%G in ('type "%~d0\PortableApps\CommonFiles\%~1\App\AppInfo\plugininstaller.ini"') do (
+    set _parameter.%%G=%%H
+)
+endlocal & (
+  set "_installed_plugin_name=%_parameter.Name%"
+  set "_installed_plugin_appid=%_parameter.AppID%"
+  set "_installed_plugin_display_version=%_parameter.DisplayVersion%"
+  set "_installed_plugin_homepage=%_parameter.Homepage%"
+)
+exit /b 0
+
 :cat
 setlocal
 if [%~1]==[] (
@@ -360,10 +371,13 @@ dir "%~d0\PortableApps" | findstr /c:Portable >nul || (
   echo %There is no portable apps in% %~d0\PortableApps.
   exit /b 31
 )
-for /f "tokens=4 delims= " %%G in ('dir "%~d0\PortableApps" ^| findstr /c:Portable') do (
+for /f %%G in ('dir /b "%~d0\PortableApps" ^| findstr /c:Portable') do (
   call :_get_installed_app_info %%G || exit /b 1
   echo "!_installed_app_appid!","!_installed_app_display_version!"
-
+)
+for /f %%G in ('dir /b "%~d0\PortableApps\CommonFiles"') do (
+  call :_get_installed_plugin_info %%G || exit /b 1
+  echo "!_installed_plugin_appid!","!_installed_plugin_display_version!"
 )
 endlocal
 exit /b 0
@@ -439,6 +453,9 @@ call :_get_app_info %~1 || exit /b 1
 if exist "%~d0\PortableApps\%~1\App\AppInfo\appinfo.ini" (
   call :_get_installed_app_info %~1 || exit /b 1
 )
+if exist "%~d0\PortableApps\CommonFiles\%~1\App\AppInfo\plugininstaller.ini" (
+  call :_get_installed_plugin_info %~1 || exit /b 1
+)
 
 if exist "%~d0\PortableApps\%~1\App\AppInfo\appinfo.ini" (
   if "%_installed_app_display_version%" neq "%_app_version%" (
@@ -449,14 +466,28 @@ if exist "%~d0\PortableApps\%~1\App\AppInfo\appinfo.ini" (
     echo %~1 %is up to date.%
     exit /b 72
   )
-) else (
-  call :download %~1
+)
+if exist "%~d0\PortableApps\CommonFiles\%~1\App\AppInfo\plugininstaller.ini" (
+  if "%_installed_plugin_display_version%" neq "%_app_version%" (
+    echo %~1 %_installed_plugin_display_version% %is installed.%
+    echo * %~1 %_installed_plugin_display_version% -^> %_app_version%
+    call :download %~1
+  ) else (
+    echo %~1 %is up to date.%
+    exit /b 72
+  )
+)
+
+if not exist "%~d0\PortableApps\%~1\App\AppInfo\appinfo.ini" (
+  if not exist "%~d0\PortableApps\CommonFiles\%~1\App\AppInfo\plugininstaller.ini" (
+    call :download %~1
+  )
 )
 
 if exist "%_downloads_dir%\%_app_filename%" (
   echo %Installing% %_app_appid% %_app_version% ... 
   echo %Please continue with the PortableApps.com Installer.%
-  :: PortableApps installer doesn't support installer command options.
+  :: PortableApps installer doesn't support installer command options, https://portableapps.com/node/32410
   call "%_downloads_dir%\%_app_filename%" && echo %_app_appid% %_app_version% %was installed successfully.% || (
     echo %Installation failed.%
     exit /b 71
@@ -489,10 +520,17 @@ dir "%~d0\PortableApps" | findstr /c:Portable >nul || (
 )
 echo %Installed apps:%
 set _apps_count_tmp=0
-for /f "tokens=4 delims= " %%G in ('dir "%~d0\PortableApps" ^| findstr /c:Portable') do (
+for /f %%G in ('dir /b "%~d0\PortableApps" ^| findstr /c:Portable') do (
   call :_get_installed_app_info %%G || exit /b 1
   if [!_installed_app_appid!] neq [] (
     echo * !_installed_app_appid! !_installed_app_display_version!
+    set /a _apps_count_tmp+=1 >nul
+  )
+)
+for /f %%G in ('dir /b "%~d0\PortableApps\CommonFiles"') do (
+  call :_get_installed_plugin_info %%G || exit /b 1
+  if [!_installed_plugin_appid!] neq [] (
+    echo * !_installed_plugin_appid! !_installed_plugin_display_version!
     set /a _apps_count_tmp+=1 >nul
   )
 )
@@ -511,7 +549,7 @@ if not exist "%~d0\PortableApps" (
 )
 echo %Outdated apps:%
 set _apps_count_tmp=0
-for /f "tokens=4 delims= " %%G in ('dir "%~d0\PortableApps" ^| findstr /c:Portable') do (
+for /f %%G in ('dir /b "%~d0\PortableApps" ^| findstr /c:Portable') do (
   if [%%G]==[] (
     echo %There is no portable apps.%
     exit /b 21
@@ -527,7 +565,27 @@ for /f "tokens=4 delims= " %%G in ('dir "%~d0\PortableApps" ^| findstr /c:Portab
   call :_get_app_info %%G || exit /b 1
   call :_get_installed_app_info %%G || exit /b 1
   if "!_installed_app_display_version!" neq "!_app_version!" (
-    echo * !_app_appid! !_installed_app_display_version! -^> !_app_version!
+    echo * !_installed_app_appid! !_installed_app_display_version! -^> !_app_version!
+    set /a _apps_count_tmp+=1 >nul
+  )
+)
+for /f %%G in ('dir /b "%~d0\PortableApps\CommonFiles"') do (
+  if [%%G]==[] (
+    echo %There is no portable plugins.%
+    exit /b 21
+  )
+  if not exist "%_bucket_dir%\%%G.csv" (
+    echo %There is no this plugins:% %~1.
+    exit /b 22
+  )
+  if not exist "%~d0\PortableApps\CommonFiles\%%G\App\AppInfo\plugininstaller.ini" (
+    echo %Plugin is not installed:% %~1
+    exit /b 81
+  )
+  call :_get_app_info %%G || exit /b 1
+  call :_get_installed_plugin_info %%G || exit /b 1
+  if "!_installed_plugin_display_version!" neq "!_app_version!" (
+    echo * !_installed_plugin_appid! !_installed_plugin_display_version! -^> !_app_version!
     set /a _apps_count_tmp+=1 >nul
   )
 )
@@ -550,7 +608,7 @@ dir "%_bucket_dir%" | findstr /i /c:%~1 >nul || (
 )
 echo %Search results:%
 set _apps_count_tmp=0
-for /f "tokens=4 delims= " %%G in ('dir "%_bucket_dir%" ^| findstr /i /c:%~1') do (
+for /f %%G in ('dir /b "%_bucket_dir%" ^| findstr /i /c:%~1') do (
   if [%%G] neq [] set /a _apps_count_tmp+=1 >nul
   echo * %%~nG
 )
@@ -589,7 +647,6 @@ setlocal
 del /q "%_cache_dir%\*"
 :: Download apps index page
 set /p "_updating_cache_tips=%Updating apps cache% ... " <nul
-@REM echo %Updating apps cache ... %
 "%_aria2c%" https://portableapps.com/apps --dir="%_cache_dir%" --out=apps.html ^
   --quiet=true --conditional-get=true --allow-overwrite=true ^
     || (
@@ -856,9 +913,13 @@ if [%~1]==[] (
   exit /b 21
 )
 if [%~1]==[*] (
-  for /f "tokens=4 delims= " %%G in ('dir "%~d0\PortableApps" ^| findstr /c:Portable') do (
+  for /f %%G in ('dir /b "%~d0\PortableApps" ^| findstr /c:Portable') do (
     call :_get_installed_app_info %%G
     call :install !_installed_app_appid!
+  )
+  for /f %%G in ('dir /b "%~d0\PortableApps\CommonFiles"') do (
+    call :_get_installed_plugin_info %%G
+    call :install !_installed_plugin_appid!
   )
 ) else (
   if not exist "%_bucket_dir%\%~1.csv" (

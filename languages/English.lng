@@ -33,6 +33,9 @@ Failed to show  app manifest:=Failed to show  app manifest:
 There is no portable apps in=There is no portable apps in
 Please input a file.=Please input a file.
 There is no portable apps.=There is no portable apps.
+There is no portable plugins.=There is no portable plugins.
+There is no this plugins:=There is no this plugins:
+Plugin is not installed:=Plugin is not installed:
 [checkup]
 Checking dependencies=Checking dependencies
 Checking=Checking

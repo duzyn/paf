@@ -33,6 +33,9 @@ Failed to show  app manifest:=无法显示应用元数据：
 There is no portable apps in=在此目录没有便携应用
 Please input a file.=请输入一个文件。
 There is no portable apps.=没有便携应用。
+There is no portable plugins.=没有便携插件。
+There is no this plugins:=找不到此插件：
+Plugin is not installed:=插件未安装：
 [checkup]
 Checking dependencies=正在检测依赖
 Checking=正在检测
@@ -59,7 +62,7 @@ Installed apps:=已安装的应用：
 Total of apps:=应用数总计：
 [status]
 Outdated apps:=有更新的应用：
-App is not installed:=应用未安装。
+App is not installed:=应用未安装：
 [search]
 Search results:=搜索结果：
 [uninstall]
