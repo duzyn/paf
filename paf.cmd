@@ -34,14 +34,14 @@ set "_aria2c_connect_timeout=10"
 :: When download packages from SourceForge, we set all the mirrors to accelerate
 :: download. Available values: SourceForge mirror list is on here:
 :: https://sourceforge.net/p/forge/documentation/Mirrors/
-set "_sourceforge_mirror_list=altushost-swe,cfhcable,cytranet,deac-ams,deac-fra,deac-riga,excellmedia,freefr,gigenet,ixpeering,jaist,kumisystems,liquidtelecom,nav,nchc,netcologne,netix,newcontinuum,onboardcloud,phoenixnap,razaoinfo,sinalbr,sitsa,tenet,udomain,ufpr,unlimited,versaweb,webwerks,yer,zenlayer"
+:: set "_sourceforge_mirror_list=altushost-swe,cfhcable,cytranet,deac-ams,deac-fra,deac-riga,excellmedia,freefr,gigenet,ixpeering,jaist,kumisystems,liquidtelecom,nav,nchc,netcologne,netix,newcontinuum,onboardcloud,phoenixnap,razaoinfo,sinalbr,sitsa,tenet,udomain,ufpr,unlimited,versaweb,webwerks,yer,zenlayer"
+set "_sourceforge_mirror_list=cfhcable,cytranet,deac-ams,deac-fra,excellmedia,freefr,gigenet,ixpeering,jaist,liquidtelecom,nav,nchc,netcologne,netix,newcontinuum,onboardcloud,phoenixnap,razaoinfo,sinalbr,sitsa,tenet,udomain,ufpr,unlimited,versaweb,webwerks,yer"
 
 :: It's useful to use a GitHub mirror to download files in GitHub Releases, RAW
 :: or Archive. Available values: false, a GitHub mirror prefix, eg.
 set "_github_mirror=false"
 :: set "_github_mirror=https://gh-proxy.com/github.com"
 :: set "_github_mirror=https://mirror.ghproxy.com/github.com"
-:: set "_github_mirror=https://githubfast.com"
 
 if not exist "%_bin_dir%" mkdir "%_bin_dir%"
 if not exist "%_bucket_dir%" mkdir "%_bucket_dir%"
