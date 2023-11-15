@@ -13,11 +13,13 @@ if "%PROCESSOR_ARCHITECTURE%"=="ARM64" (
 set "_aria2c=%_bin_dir%\x64\aria2c.exe"
 set "_rg=%_bin_dir%\x64\rg.exe"
 set "_sed=%_bin_dir%\x64\sed.exe"
+set "_autohotkey=%_bin_dir%\x64\autohotkey.exe"
 if "%PROCESSOR_ARCHITECTURE%"=="x86" (
   if not defined PROCESSOR_ARCHITEW6432 (
     set "_aria2c=%_bin_dir%\x86\aria2c.exe"
     set "_rg=%_bin_dir%\x86\rg.exe"
     set "_sed=%_bin_dir%\x86\sed.exe"
+    set "_autohotkey=%_bin_dir%\x86\autohotkey.exe"
   )
 )
 
@@ -486,12 +488,14 @@ if not exist "%~d0\PortableApps\%~1\App\AppInfo\appinfo.ini" (
 
 if exist "%_downloads_dir%\%_app_filename%" (
   echo %Installing% %_app_appid% %_app_version% ... 
-  echo %Please continue with the PortableApps.com Installer.%
+  @REM echo %Please continue with the PortableApps.com Installer.%
   :: PortableApps installer doesn't support installer command options, https://portableapps.com/node/32410
-  call "%_downloads_dir%\%_app_filename%" && echo %_app_appid% %_app_version% %was installed successfully.% || (
-    echo %Installation failed.%
-    exit /b 71
-  )
+  call "%_autohotkey%" "%~dp0bin\paf_install.ahk" "%_downloads_dir%\%_app_filename%" "%~d0\PortableApps\%~1" ^
+    && echo %_app_appid% %_app_version% %was installed successfully.% ^
+    || (
+      echo %Installation failed.%
+      exit /b 71
+    )
 )
 endlocal
 exit /b 0
@@ -737,8 +741,8 @@ for /f tokens^=2^ delims^=^" %%G in ('call "%_rg%" a\s+href^=\"/apps/.+\" --only
 )>>"%_cache_dir%\apps-url.txt"
 
 :: Remove duplicated lines
-move "%_cache_dir%\apps-url.txt" "%_cache_dir%\apps-url-1.txt" /y >nul
-@REM copy nul "%_cache_dir%\apps-url.txt" >nul
+rename "%_cache_dir%\apps-url.txt" "apps-url-1.txt" >nul
+copy nul "%_cache_dir%\apps-url.txt" >nul
 for /f "tokens=*" %%G in ('type "%_cache_dir%\apps-url-1.txt"') do (
   findstr /c:"%%G" "%_cache_dir%\apps-url.txt" >nul ^
     || echo %%G>>"%_cache_dir%\apps-url.txt"
