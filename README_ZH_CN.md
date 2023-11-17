@@ -125,13 +125,13 @@ paf 1.0
 
 以下高级选项可以根据你的实际情况设置。
 
-- [_aria2c_min_split_size](https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-k): 默认是 1MB
-- [_aria2c_split](https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-s): 默认是 10
-- [_aria2c_max_connection_per_server](https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-x): 默认是 10
-- [_aria2c_max_concurrent_downloads](https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-j): 默认是 50
-- [_aria2c_max_tries](https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-m): 默认是 2
-- [_aria2c_connect_timeout](https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-connect-timeout): 默认是 10
-- _github_mirror：默认是 false，中国的用户访问 GitHub 慢的话，可以设置为 <https://gh-proxy.com/github.com> 或 <https://mirror.ghproxy.com/github.com>
+- [aria2-min-split-size](https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-k): 默认是 1MB
+- [aria2-split](https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-s): 默认是 10
+- [aria2-max-connection-per-server](https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-x): 默认是 10
+- [aria2-max-concurrent-downloads](https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-j): 默认是 50
+- [aria2-max-tries](https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-m): 默认是 2
+- [aria2-connect-timeout](https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-connect-timeout): 默认是 10
+- github-mirror：默认是 false，中国的用户访问 GitHub 慢的话，可以设置为 <https://gh-proxy.com/github.com> 或 <https://mirror.ghproxy.com/github.com>
 
 ## 致谢
 

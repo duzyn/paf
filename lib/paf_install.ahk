@@ -43,6 +43,30 @@ Else
     If WinExist("PortableApps.com Installer", "Choose Components")
     {
       WinActivate
+      ; Check all components. 2N+1 times
+      Send "{Down}"
+      Send "{Space}"
+      Send "{Down}"
+      Send "{Space}"
+      Send "{Down}"
+      Send "{Space}"
+      Send "{Down}"
+      Send "{Space}"
+      Send "{Down}"
+      Send "{Space}"
+      Send "{Down}"
+      Send "{Space}"
+      Send "{Down}"
+      Send "{Space}"
+      Send "{Down}"
+      Send "{Space}"
+      Send "{Down}"
+      Send "{Space}"
+      Send "{Down}"
+      Send "{Space}"
+      Send "{Down}"
+      Send "{Space}"
+      
       Send "{Enter}"
     }
 
@@ -51,8 +75,8 @@ Else
     If WinExist("PortableApps.com Installer", "Choose Install Location")
     {
       WinActivate
-      A_Clipboard := StrReplace(A_Args[2], '"')
-      Send "^v"
+      ; A_Clipboard := StrReplace(A_Args[2], '"')
+      ; Send "^v"
       Send "{Enter}"
     }
 

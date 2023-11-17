@@ -36,6 +36,7 @@ There is no portable apps.=There is no portable apps.
 There is no portable plugins.=There is no portable plugins.
 There is no this plugins:=There is no this plugins:
 Plugin is not installed:=Plugin is not installed:
+There is no config.ini.=There is no config.ini.
 [checkup]
 Checking dependencies=Checking dependencies
 Checking=Checking
@@ -50,6 +51,11 @@ Download failed.=Download failed.
 Checking hash of=Checking hash of
 CertUtil is not found.=CertUtil is not found.
 Hash is wrong.=Hash is wrong.
+[info]
+Name:=Name:
+AppID:=AppID:
+Version:=Version:
+Homepage:=Homepage:
 [install]
 is installed.=is installed.
 is up to date.=is up to date.

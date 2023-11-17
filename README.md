@@ -124,13 +124,13 @@ COMMANDS:
 
 The following advanced options can be set according to your actual situation.
 
-- [_aria2c_min_split_size](https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-k): Default is 1MB
-- [_aria2c_split](https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-s): Default is 10
-- [_aria2c_max_connection_per_server](https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-x): Default is 10
-- [_aria2c_max_concurrent_downloads](https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-j): Default is 50
-- [_aria2c_max_tries](https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-m): Default is 2
-- [_aria2c_connect_timeout](https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-connect-timeout): Default is 10
-- _github_mirror: Default is false, If users in China are slow to access GitHub, they can set it to <https://gh-proxy.com/github.com> or <https://mirror.ghproxy.com/github.com>
+- [aria2-min-split-size](https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-k): Default is 1MB
+- [aria2-split](https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-s): Default is 10
+- [aria2-max-connection-per-server](https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-x): Default is 10
+- [aria2-max-concurrent-downloads](https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-j): Default is 50
+- [aria2-max-tries](https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-m): Default is 2
+- [aria2-connect-timeout](https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-connect-timeout): Default is 10
+- github-mirror: Default is false, If users in China are slow to access GitHub, they can set it to <https://gh-proxy.com/github.com> or <https://mirror.ghproxy.com/github.com>
 
 ## Thanks
 

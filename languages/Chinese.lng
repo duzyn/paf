@@ -36,6 +36,7 @@ There is no portable apps.=没有便携应用。
 There is no portable plugins.=没有便携插件。
 There is no this plugins:=找不到此插件：
 Plugin is not installed:=插件未安装：
+There is no config.ini.=未找到 config.ini
 [checkup]
 Checking dependencies=正在检测依赖
 Checking=正在检测
@@ -50,6 +51,11 @@ Download failed.=下载失败。
 Checking hash of=正在检测此应用的哈希值
 CertUtil is not found.=未找到 CertUtil。
 Hash is wrong.=哈希值错误。
+[info]
+Name:=名称：
+AppID:=应用 ID：
+Version:=版本：
+Homepage:=主页：
 [install]
 is installed.=已安装。
 is up to date.=已是最新版本。
