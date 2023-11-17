@@ -13,7 +13,7 @@ Else
 
   Loop
   {
-    If WinExist("Installer Language")
+    If WinExist("Portable", "select a language")
     {
       WinActivate
       Send "{Enter}"
@@ -22,6 +22,7 @@ Else
     Sleep 100
 
     If WinExist("PortableApps.com Installer", "This wizard")
+      or WinExist("PortableApps.com Installer", "向导")
     {
       WinActivate
       Send "{Enter}"
@@ -30,6 +31,7 @@ Else
     Sleep 100
 
     If WinExist("PortableApps.com Installer", "License Agreement")
+      or WinExist("PortableApps.com Installer", "协议")
     {
       WinActivate
       ControlSend "{Enter}", "Agree"
@@ -41,6 +43,7 @@ Else
     Sleep 100
 
     If WinExist("PortableApps.com Installer", "Choose Components")
+      or WinExist("PortableApps.com Installer", "组件")
     {
       WinActivate
       ; Check all components. 2N+1 times
@@ -73,6 +76,7 @@ Else
     Sleep 100
 
     If WinExist("PortableApps.com Installer", "Choose Install Location")
+      or WinExist("PortableApps.com Installer", "位置")
     {
       WinActivate
       ; A_Clipboard := StrReplace(A_Args[2], '"')
@@ -83,6 +87,7 @@ Else
     Sleep 100
 
     If WinExist("PortableApps.com Installer", "Finish")
+      or  WinExist("PortableApps.com Installer", "完成")
     {
       Send "{Enter}"
       Break
