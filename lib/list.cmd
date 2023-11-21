@@ -16,11 +16,13 @@ copy nul "%_cache_dir%\_list.txt" >nul || exit /b 1
 
 echo %Installed apps:%
 set _apps_count_tmp=0
-for /f %%G in ('dir /b "%~d0\PortableApps" ^| findstr /c:Portable') do (
-  call "%~dp0_get_installed_app_info.cmd" %%G || exit /b 1
-  if [!_installed_app_appid!] neq [] (
-    echo !_installed_app_appid! !_installed_app_display_version!>>"%_cache_dir%\_list.txt"
-    set /a _apps_count_tmp+=1 >nul
+if exist "%~d0\PortableApps" (
+  for /f %%G in ('dir /b "%~d0\PortableApps" ^| findstr /c:Portable') do (
+    call "%~dp0_get_installed_app_info.cmd" %%G || exit /b 1
+    if [!_installed_app_appid!] neq [] (
+      echo !_installed_app_appid! !_installed_app_display_version!>>"%_cache_dir%\_list.txt"
+      set /a _apps_count_tmp+=1 >nul
+    )
   )
 )
 
