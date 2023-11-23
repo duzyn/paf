@@ -31,13 +31,14 @@ Else
     Sleep 100
 
     If WinExist("PortableApps.com Installer", "License Agreement")
-      or WinExist("PortableApps.com Installer", "协议")
     {
       WinActivate
       ControlSend "{Enter}", "Agree"
-      ; Send "{Tab}"
-      ; Send "{Space}"
-      ; Send "{Enter}"
+    }
+    If WinExist("PortableApps.com Installer", "协议")
+    {
+      WinActivate
+      ControlSend "{Enter}", "接受"
     }
 
     Sleep 100
