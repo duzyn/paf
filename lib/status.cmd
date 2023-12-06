@@ -1,23 +1,23 @@
 setlocal enabledelayedexpansion
 
 if not exist "%~d0\PortableApps" (
-  echo %There is no portable apps in% %~d0\PortableApps.
+  echo There is no portable apps in %~d0\PortableApps.
   exit /b 31
 )
-echo %Outdated apps:%
+echo Outdated apps:
 set _apps_count_tmp=0
 if exist "%~d0\PortableApps" (
   for /f %%G in ('dir /b "%~d0\PortableApps" ^| findstr /c:Portable') do (
     if [%%G] == [] (
-      echo %There is no portable apps.%
+      echo There is no portable apps.
       exit /b 21
     )
     if not exist "%_bucket_dir%\%%G.csv" (
-      echo %There is no this app:% %~1
+      echo There is no this app: %~1
       exit /b 22
     )
     if not exist "%~d0\PortableApps\%%G\App\AppInfo\appinfo.ini" (
-      echo %App is not installed:% %~1
+      echo App is not installed: %~1
       exit /b 81
     )
     call "%~dp0_get_app_info.cmd" %%G || exit /b 1
@@ -32,15 +32,15 @@ if exist "%~d0\PortableApps" (
 if exist "%~d0\PortableApps\CommonFiles" (
   for /f %%G in ('dir /b "%~d0\PortableApps\CommonFiles"') do (
     if [%%G] == [] (
-      echo %There is no portable plugins.%
+      echo There is no portable plugins.
       exit /b 21
     )
     if not exist "%_bucket_dir%\%%G.csv" (
-      echo %There is no this plugins:% %~1
+      echo There is no this plugins: %~1
       exit /b 22
     )
     if not exist "%~d0\PortableApps\CommonFiles\%%G\App\AppInfo\plugininstaller.ini" (
-      echo %Plugin is not installed:% %~1
+      echo Plugin is not installed: %~1
       exit /b 81
     )
     call "%~dp0_get_app_info.cmd" %%G || exit /b 1
@@ -53,6 +53,6 @@ if exist "%~d0\PortableApps\CommonFiles" (
 )
 
 for /f "delims=" %%G in ('echo %_apps_count_tmp%') do set _apps_count=%%G
-echo %Total of apps:% %_apps_count%
+echo Total of apps: %_apps_count%
 set "_apps_count_tmp="
 endlocal

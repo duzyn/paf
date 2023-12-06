@@ -1,5 +1,5 @@
 if not exist "%~dp0..\config.ini" (
-  echo %There is no config.ini.%
+  echo There is no config.ini.
   exit /b 1
 )
 

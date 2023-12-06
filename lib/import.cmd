@@ -1,12 +1,12 @@
 setlocal
 
 if "%~1" == "" (
-  echo %Please input a file.%
+  echo Please input a file.
   exit /b 41
 )
 
 if not exist "%~1" (
-  echo %There is no this app:% %~1
+  echo There is no this app: %~1
   exit /b 22
 )
 

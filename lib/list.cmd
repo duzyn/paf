@@ -1,20 +1,20 @@
 setlocal enabledelayedexpansion
 
 if not exist "%~d0\PortableApps" (
-  echo %There is no portable apps in% %~d0\PortableApps.
+  echo There is no portable apps in %~d0\PortableApps.
   exit /b 31
 )
 
 if not exist "%~d0\PortableApps\CommonFiles" (
   dir /b "%~d0\PortableApps" | findstr /c:Portable >nul || (
-    echo %There is no portable apps in% %~d0\PortableApps.
+    echo There is no portable apps in %~d0\PortableApps.
     exit /b 31
   )
 )
 
 copy nul "%_cache_dir%\_list.txt" >nul || exit /b 1
 
-echo %Installed apps:%
+echo Installed apps:
 set _apps_count_tmp=0
 if exist "%~d0\PortableApps" (
   for /f %%G in ('dir /b "%~d0\PortableApps" ^| findstr /c:Portable') do (
@@ -40,6 +40,6 @@ sort "%_cache_dir%\_list.txt"
 del /q "%_cache_dir%\_list.txt" || exit /b 1
 
 for /f "delims=" %%G in ('echo %_apps_count_tmp%') do set _apps_count=%%G
-echo %Total of apps:% %_apps_count%
+echo Total of apps: %_apps_count%
 set "_apps_count_tmp="
 endlocal

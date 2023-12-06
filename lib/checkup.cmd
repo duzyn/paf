@@ -1,12 +1,12 @@
 setlocal
 
-echo %Checking dependencies% ... 
+echo Checking dependencies ... 
 for %%G in ("%_aria2c%" "%_rg%" "%_sed%" "%_autohotkey%") do (
-  set /p "_checking-tips=%Checking% %%~nG ... " <nul
+  set /p "_checking-tips=Checking %%~nG ... " <nul
   if exist %%G (
-    echo %OK%
+    echo OK
   ) else (
-    echo %Not found%
+    echo Not found
   )
 )
 endlocal

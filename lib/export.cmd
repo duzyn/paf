@@ -1,13 +1,13 @@
 setlocal enabledelayedexpansion
 
 if not exist "%~d0\PortableApps" (
-  echo %There is no portable apps in% %~d0\PortableApps.
+  echo There is no portable apps in %~d0\PortableApps.
   exit /b 31
 )
 
 if not exist "%~d0\PortableApps\CommonFiles" (
   dir /b "%~d0\PortableApps" | findstr /c:Portable >nul || (
-    echo %There is no portable apps in% %~d0\PortableApps.
+    echo There is no portable apps in %~d0\PortableApps.
     exit /b 31
   )
 )

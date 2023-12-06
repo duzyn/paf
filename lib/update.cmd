@@ -5,7 +5,7 @@ del /q "%_bucket_dir%\*" >nul || exit /b 1
 del /q "%_cache_dir%\*" >nul || exit /b 1
 
 :: Download apps index page
-set /p "_updating_cache_tips=%Updating apps cache% ... " <nul
+set /p "_updating_cache_tips=Updating apps cache ... " <nul
 "%_aria2c%" https://portableapps.com/apps ^
   --dir="%_cache_dir%" ^
   --out=apps.html ^
@@ -13,7 +13,7 @@ set /p "_updating_cache_tips=%Updating apps cache% ... " <nul
   --conditional-get=true ^
   --allow-overwrite=true ^
   || (
-    echo %Download failed.%
+    echo Download failed.
     exit /b 23
   )
 
@@ -114,13 +114,13 @@ for /f "delims=" %%G in ('type "%_cache_dir%\apps-url-1.txt"') do (
   --conditional-get=true ^
   --allow-overwrite=false ^
   --max-concurrent-downloads=%_config.aria2-max-concurrent-downloads% ^
-  && echo %Done% ^
+  && echo Done ^
   || (
-    echo %Download failed.%
+    echo Download failed.
     exit /b 23
   )
 
-set /p "_updating_bucket_tips=%Updating bucket% ... " <nul
+set /p "_updating_bucket_tips=Updating bucket ... " <nul
 :: Get an app's meta info from its app page
 copy nul "%_cache_dir%\apps-parameters.txt" >nul || exit /b 1
 for /f tokens^=1^ delims^=^" %%G in ('call "%_rg%" "antivirus\?(.+).+Antivirus.+" --only-matching --replace $1 --no-filename "%_cache_dir%"') do (
@@ -277,12 +277,12 @@ if "%_config.github-mirror%" == "false" (
 
 :: // TODO Remove wrong PackageUrl2
 
-echo %Done%
+echo Done
 
 :: Count apps
 set _apps_count_tmp=0
 for %%G in ("%_bucket_dir%\*.csv") do set /a _apps_count_tmp+=1 >nul
 for /f "delims=" %%G in ('echo %_apps_count_tmp%') do set _apps_count=%%G
-echo %Total of apps:% %_apps_count%
+echo Total of apps: %_apps_count%
 set "_apps_count_tmp="
 endlocal

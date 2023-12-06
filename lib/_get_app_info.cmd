@@ -1,12 +1,12 @@
 setlocal
 
 if "%~1" == "" (
-  echo %Please input an app name.%
+  echo Please input an app name.
   exit /b 21
 )
 
 if not exist "%_bucket_dir%\%~1.csv" (
-  echo %There is no this app:% %~1
+  echo There is no this app: %~1
   exit /b 22
 )
 

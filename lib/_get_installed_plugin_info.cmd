@@ -1,12 +1,12 @@
 setlocal
 
 if "%~1" == "" (
-  echo %Please input an app name.%
+  echo Please input an app name.
   exit /b 21
 )
 
 if not exist "%~d0\PortableApps\CommonFiles\%~1\App\AppInfo\plugininstaller.ini" (
-  echo %App is not installed:% %~1
+  echo App is not installed: %~1
   exit /b 81
 )
 

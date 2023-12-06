@@ -6,7 +6,7 @@ set "_downloads_dir=%~dp0..\downloads"
 
 :: https://ss64.com/nt/syntax-64bit.html
 if "%PROCESSOR_ARCHITECTURE%" == "ARM64" (
-  echo %Not support ARM64%
+  echo Not support ARM64
   exit /b 1
 )
 
