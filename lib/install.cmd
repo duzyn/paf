@@ -33,7 +33,7 @@ if exist "%~d0\PortableApps\CommonFiles\%~1\App\AppInfo\plugininstaller.ini" (
 
 if exist "%_downloads_dir%\%_app_filename%" (
   echo Installing %_app_appid% %_app_version% ... 
-  call "%_autohotkey%" "%~dp0paf_install.ahk" "%_downloads_dir%\%_app_filename%" "%~d0\PortableApps\%~1" ^
+  call "%_downloads_dir%\%_app_filename%" ^
     && echo %_app_appid% %_app_version% was installed successfully. ^
     || (
       echo Installation failed.
